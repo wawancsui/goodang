@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+{% autoescape true %}
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/stylesheets/main.css">
+	</head>
+	<body>
+		{% for item in items %}
+			{% if item.creator %}
+				<b>{{ item.creator.nickname()}}</b> added:
+			{% else %}
+				Someone added:
+			{% endif %}
+			<blockquote>{{ item.name}}</blockquote>
+		{% endfor %}
+
+		<form action="/product?product_name={{ product_name}}" method="post">
+			<div><textarea name="productname" rows="3" cols="60"></textarea></div>
+			<div><textarea name="productsku" rows="3" cols="60"></textarea></div>
+			<div><input type="submit" value="Save Product"></div>
+		</form>
+
+		<hr>
+
+		<form>Product name:
+			<input value="{{ product_name }}" name="product_name">
+			<input type="submit" value="switch">
+		</form>
+
+		<a href="{{ url|safe}}">{{ url_linktext }}</a>
+
+	</body>
+</html>
+{% endautoescape %}
