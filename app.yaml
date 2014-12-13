@@ -8,6 +8,9 @@ handlers:
 - url: /stylesheets
   static_dir: stylesheets
 
+- url: /_ah/spi/.*
+  script: goodang_api.APPLICATION
+
 - url: /.*
   script: goodang.application
 

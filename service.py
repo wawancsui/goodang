@@ -1,6 +1,6 @@
-#from protorpc.wsgi import service
+from protorpc.wsgi import service
 
-#import postservice
+import postservice
 
-# Map the RPC service and path (/PostService)
-#app = service.service_mappings([('/PostService', postservice.PostService)])
+#Map the RPC service and path (/PostService)
+app = service.service_mappings([('/PostService', postservice.PostService)])
