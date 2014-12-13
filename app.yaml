@@ -5,14 +5,21 @@ api_version: 1
 threadsafe: true
 
 handlers:
+
+- url: /bootstrap
+  static_dir: static/bootstrap
+
 - url: /stylesheets
   static_dir: stylesheets
 
 - url: /_ah/spi/.*
   script: goodang_api.APPLICATION
 
-- url: /.*
-  script: goodang.application
+- url: /
+  static_files: templates/index.html
+  upload: templates/index\.html
+#- url: /.*
+#  script: goodang.application
 
 #- url: /PostService.*
 #  script: service.app

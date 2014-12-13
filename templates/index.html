@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Goodang</title>
+		<link rel="stylesheet" href="/bootstrap/css/bootstrap.css">
+		<style>
+			body {
+				padding-top: 40px;
+				padding-bottom: 40px;
+				background-color: #f5f5f5;
+			}
+			blockquote {
+				margin-bottom: 10px;
+				border-left-color: #bbb;
+			}
+			form {
+				margin-top: 10px;
+			}
+			form label {
+				width: 90px;
+				display: inline-block;
+			}
+			.form-signin input[type="text"] {
+				font-size: 16px;
+				height: auto;
+				margin-bottom: 15px;
+				padding: 7px 9px;
+			}
+			.row {
+				margin-left: 0px;
+				margin-top: 10px;
+				overflow: scroll;
+			}
+		</style>
+		<script>
+				WEB_CLIENT_ID = '426535775018-56vhejkglekkhtu7k73ctu1471heb3t0.apps.googleusercontent.com';
+
+				SCOPE = 'https://www.googleapis.com/auth/userinfo.email';
+
+				signedIn = false;
+
+				function init() {
+					var apiToLoad;
+					var callback = function() {
+						if (--apiToLoad == 0) {
+							enableButton();
+							signin(true, userAuthed);
+						}
+					}
+
+					apiToLoad = 2;
+					apiRoot = '//' + window.location.host + '/_ah/api';
+					gapi.client.load('goodang', 'v1', callback, apiRoot);
+					gapi.client.load('oauth2', 'v2', callback);
+				}
+
+				function enableButton() {
+					var getItem = document.querySelector('#getItem');
+					getItem.addEventListener('click', function(e) {
+						getItems(document.querySelector('#name').value);
+					});
+
+					var listItem = document.querySelector('#listItem');
+					listItem.addEventListener('click', listItem);
+
+					var insertItem = document.querySelector('#insertItem');
+					insertItem.addEventListener('click', function(e) {
+							insertNewItem(
+								document.querySelector('#productname').value,
+								document.querySelector('#productsku').value);
+					});
+
+					var authedUser = document.querySelector('#authedUser');
+					authedUser.addEventListener('click', authedUser);
+
+					var signinButton = document.querySelector('#signinButton');
+					signinButton.addEventListener('click', auth);
+				}
+
+				function signin(mode, callback) {
+					gapi.auth.authorize({client_id : WEB_CLIENT_ID,
+						scope: SCOPE, immediate: mode}, callback);
+				}
+
+				function auth() {
+					if (! signedIn) {
+						signin(false, userAuthed);
+					} else {
+						signedIn = false;
+						document.querySelector('#signinButton').textContent = 'Sign in';
+						document.querySelector('#authedUser').disabled = true;
+					}
+				}
+
+				function userAuthed() {
+					var request = gapi.client.oauth2.userinfo.get().execute(function(response) {
+						if (!response.code) {
+							signedIn = true;
+							document.querySelector('#signinButton').textContent = 'Sign out';
+							document.querySelector('#authedUser').disabled = false;
+						}
+					});
+				}
+
+				function authedUser(id) {
+					gapi.client.goodang.items.authed().execute(
+						function(response) {
+							print(response);
+						});
+				}
+
+				function getItems(name) {
+					gapi.client.goodang.items.list({'name' : name}).execute(
+							function(response) {
+								if(!response.code) {
+									response.items = response.items || [];
+									for (var i = 0; i < response.items.length; i++) {
+										print(response.items[i])
+									}
+								}
+							}
+						);
+				}
+
+				function insertNewItem(name, sku) {
+					gapi.client.goodang.items.insert({
+						'name' : name,
+						'sku' : sku
+					}).execute(function(response) {
+						if (!response.code) {
+							print(response);
+						}
+					});
+				}
+
+				function print(item) {
+					var element = document.createElement('div');
+					element.classList.add('row');
+					element.innerHTML = item.sku;
+					document.querySelector("#outputLog").appendChild(element);
+				}
+
+		</script>
+	</head>
+	<body>
+		<div class="navbar navbar-inverse navbar-fixed-top">
+			<div class="navbar-inner">
+				<div class="container">
+					<button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="brand" href="#">Hello Goodang</a>
+					<div class="nav-collapse pull-right">
+						<a href="javascript:void(0);" class="btn" id="signinButton">Sign In</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<output id="outputLog">disini</output>
+
+			<form onsubmit="return false;">
+				<h2>Get Items</h2>
+				<div><label for="name">Item Name:</label><input id="name"></div>
+				<div><input id="getItem" type="submit" class="btn btn-small" value="Search"></div>
+			</form>
+
+			<form onsubmit="return false;">
+				<h2>List Item</h2>
+				<div><input id="listItem" type="submit" class="btn btn-small" value="Get All"></div>
+			</form>
+
+			<form onsubmit="return false;">
+				<h2>Insert new Item:</h2>
+				<div><label for="productname">Name:</label><input id="productname"></div>
+				<div><label for="productsku">SKU:</label><input id="productsku"></div>
+				<div><input id="insertItem" type="submit" class="btn btn-small" value="Insert"></div>
+			</form>
+
+			<form onsubmit="return false;">
+				<h2>Aunthentication</h2>
+				<div><input id="authedUser" type="submit" class="btn btn-small" disabled value="Submit"></div>
+			</form>
+
+			<script src="https://apis.google.com/js/client.js?onload=init">
+			</script>
+		</div>
+	</body>
+</html>

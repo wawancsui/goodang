@@ -1,4 +1,5 @@
 from google.appengine.ext import endpoints
+from protorpc import message_types
 from protorpc import remote
 
 from models import Item
@@ -8,9 +9,16 @@ from goodang_messages import ItemResponse
 from goodang_messages import ItemListRequest
 from goodang_messages import ItemListResponse
 
-CLIENT_ID = '426535775018-56vhejkglekkhtu7k73ctu1471heb3t0.apps.googleusercontent.com'
+WEB_CLIENT_ID = '426535775018-56vhejkglekkhtu7k73ctu1471heb3t0.apps.googleusercontent.com'
+ANDROID_CLIENT_ID = ''
+IOS_CLIENT_ID = ''
+ANDROID_AUDIENCE = WEB_CLIENT_ID
 
-@endpoints.api(name='goodang', version='v1', description='Goodang API', allowed_client_ids=[CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID])
+@endpoints.api(name='goodang', version='v1',
+	description='Goodang API',
+	allowed_client_ids=[WEB_CLIENT_ID, endpoints.API_EXPLORER_CLIENT_ID],
+	audiences=[ANDROID_AUDIENCE],
+	scopes=[endpoints.EMAIL_SCOPE])
 
 class GoodangApi(remote.Service):
 	@endpoints.method(ItemListRequest, ItemListResponse, path='items', http_method='GET', name='items.list')
@@ -27,5 +35,14 @@ class GoodangApi(remote.Service):
 	def item_insert(self, request):
 		entity = Item.put_from_message(request)
 		return entity.to_message()
+
+	@endpoints.method(message_types.VoidMessage, ItemResponse,
+		path='authed', http_method='POST',
+		name='items.authed')
+	def goodang_authed(self, request):
+		current_user = endpoints.get_current_user()
+		email = (current_user.email() if current_user is not None
+			else 'Someone')
+		return Item(name='hello %s' % (email,))
 
 APPLICATION = endpoints.api_server([GoodangApi], restricted=False)
